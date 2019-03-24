@@ -1,4 +1,6 @@
 # r
+For your daily dose of shitposting  
+[![Build Status](https://travis-ci.com/manuraj17/r.svg?branch=master)](https://travis-ci.com/manuraj17/r)
 
 ## Terminal
 ```
@@ -11,6 +13,7 @@ Y
 ```
 ## Pipe to clipboard
 ```
+OSX
 > r daily | pbcopy
 ```
 
