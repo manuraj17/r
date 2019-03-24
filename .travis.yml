@@ -3,25 +3,52 @@ env:
   global:
   - PROJECT_NAME: r
   - RUST_BACKTRACE: full
-rust:
-- stable
-- beta
-- nightly
-matrix:
-  allow_failures:
-  - rust: nightly
-  fast_finish: true
-cache: cargo
-script:
-- cargo build --verbose
-branches:
-  only:
-  - master
-deploy:
-  provider: releases
-  skip_cleanup: true
-  api_key:
+# Cache `cargo install`ed tools, but don't cache the project's `target`
+# directory (which ends up over-caching and filling all disk space!)
+cache:
+  directories:
+    - /home/travis/.cargo
+
+GH_TOKEN: &GH_TOKEN
     secure: o5h9gXXNTwEjPGsm23II2edPIe0Dd+W4gNHQbX0v7Fu7aud+Pc2V02ZRxiOlX95Pm0z3qKvif7IQPmWeaAROF1QqjnQDUpglcOnMY5YP2/H87MC0PBhsamP80804/DfqZ9rrU5ClRjfHqKgMF2YmZORYBlc9a+r7hpRADPSdtKqWT9k2QxeO4IkQZbzaJvEou822uViAZeYqvT6kmPny53tqwXBza2edE8moNiYxW/+8zBLNab/7UZB21/eUNWB68WRqkH6ycsRnm/qnWALQEB49QDRVooLHg8s5uXtrRCCdx/9ksU2/ZuJr+iWg7UsJtnwm/j5hynUyJmao7rc88iifThfPcy8yBBFGrp4iB6XXJem/Huy7kI9GiNGbxy6ohZzHrIX3SKa8bIjUK3P0m0RgJ3/Jowj6E/PJN2SDqu/auyZOBXFIW+k4DVYYT4rLdTtmCa730ieJcae7CfsA2jBSx+x9UfpTMwPrFjWFO8X+9yjdd0XZIZkv2wXJY21P5xLB9MUgI/rtRu0SZ/S5AAo5MjDHdzkujRU9Trtz1UALvA4zTOO88nYRSDqZsELWBk1Ib9c6WupWHrdtUfU1eP1L5c9EZKBnEMUvHXecmLhjj7wOEEOs67WYg3jHMtaIYFeUkfiXt3irTMOvddL/XFvH6FDtNtsVHmqcfckOyxM=
-  file: "./target/release/r"
-  on:
-    repo: manuraj17/r
+
+DEPLOY_TO_GITHUB: &DEPLOY_TO_GITHUB
+  before_deploy:
+    - git config --local user.name "Manu Raj"
+    - git config --local user.email "manu.elayath@gmail.com"
+    - name="r-$TRAVIS_TAG-$TARGET"
+    - mkdir $name
+    - cp target/$TARGET/release/r $name/
+    - cp README.md LICENSE-MIT LICENSE-APACHE $name/
+    - tar czvf $name.tar.gz $name
+  deploy:
+    provider: releases
+    api_key: *GH_TOKEN
+    file: r-$TRAVIS_TAG-$TARGET.tar.gz
+    skip_cleanup: true
+    on:
+      branch: master
+      tags: true
+
+matrix:
+  include:
+  - name: Linux Binary
+    env: TARGET=x86_64-unknown-linux-musl
+    rust: nightly
+    before_script: rustup target add $TARGET
+    script: cargo build --release --target $TARGET --locked --features vendored-openssl
+    addons:
+      apt:
+        packages:
+          - musl-tools
+
+  - name: macOS Binary
+    env: MACOSX_DEPLOYMENT_TARGET=10.7 TARGET=x86_64-apple-darwin
+    os: osx
+    rust: nightly
+    script: cargo build --release --target $TARGET --locked
+    install: true
+
+notifications:
+  email:
+    on_success: never
