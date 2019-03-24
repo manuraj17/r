@@ -16,10 +16,11 @@ DEPLOY_TO_GITHUB: &DEPLOY_TO_GITHUB
   before_deploy:
     - git config --local user.name "Manu Raj"
     - git config --local user.email "manu.elayath@gmail.com"
+    - git fetch --tags
     - name="r-$TRAVIS_TAG-$TARGET"
     - mkdir $name
     - cp target/$TARGET/release/r $name/
-    - cp README.md LICENSE-MIT LICENSE-APACHE $name/
+    - cp README.md LICENSE $name/
     - tar czvf $name.tar.gz $name
   deploy:
     provider: releases
