@@ -1,0 +1,26 @@
+language: rust
+env:
+  global:
+  - PROJECT_NAME: r
+  - RUST_BACKTRACE: full
+rust:
+- stable
+- beta
+- nightly
+matrix:
+  allow_failures:
+  - rust: nightly
+  fast_finish: true
+cache: cargo
+script:
+- cargo build --verbose
+branches:
+  only:
+  - master
+deploy:
+  provider: releases
+  api_key:
+    secure: o5h9gXXNTwEjPGsm23II2edPIe0Dd+W4gNHQbX0v7Fu7aud+Pc2V02ZRxiOlX95Pm0z3qKvif7IQPmWeaAROF1QqjnQDUpglcOnMY5YP2/H87MC0PBhsamP80804/DfqZ9rrU5ClRjfHqKgMF2YmZORYBlc9a+r7hpRADPSdtKqWT9k2QxeO4IkQZbzaJvEou822uViAZeYqvT6kmPny53tqwXBza2edE8moNiYxW/+8zBLNab/7UZB21/eUNWB68WRqkH6ycsRnm/qnWALQEB49QDRVooLHg8s5uXtrRCCdx/9ksU2/ZuJr+iWg7UsJtnwm/j5hynUyJmao7rc88iifThfPcy8yBBFGrp4iB6XXJem/Huy7kI9GiNGbxy6ohZzHrIX3SKa8bIjUK3P0m0RgJ3/Jowj6E/PJN2SDqu/auyZOBXFIW+k4DVYYT4rLdTtmCa730ieJcae7CfsA2jBSx+x9UfpTMwPrFjWFO8X+9yjdd0XZIZkv2wXJY21P5xLB9MUgI/rtRu0SZ/S5AAo5MjDHdzkujRU9Trtz1UALvA4zTOO88nYRSDqZsELWBk1Ib9c6WupWHrdtUfU1eP1L5c9EZKBnEMUvHXecmLhjj7wOEEOs67WYg3jHMtaIYFeUkfiXt3irTMOvddL/XFvH6FDtNtsVHmqcfckOyxM=
+  file: "./target/release/r"
+  on:
+    repo: manuraj17/r
